@@ -1,145 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>纸牌接龙</title>
-    <script src="js/main.js"></script>
-    <script src="js/utils.js"></script>
-    <style>
-        body {
-            background-image: url("bg.jpg");
-            background-repeat: no-repeat;
-            background-size: cover;
-        }
+    <head>
+        <meta charset="UTF-8">
+        <title>纸牌接龙</title>
+        <script src="js/main.js"></script>
+        <script src="js/utils.js"></script>
+        <style>
+            body {
+                background-image: url("bg.jpg");
+                background-repeat: no-repeat;
+                background-size: cover;
+            }
 
-        #id-main {
-            position: relative;
-            margin: 0 auto;
-            width: 1170px;
-            height: 700px;
-            overflow: hidden;
-        }
+            #id-main {
+                position: relative;
+                margin: 0 auto;
+                width: 1170px;
+                height: 700px;
+                overflow: hidden;
+            }
 
-        .card {
-            position: absolute;
-            display: inline-block;
-            background-image: url("poker.png");
-            width: 105px;
-            height: 148px;
-            border-radius: 6px;
-            top: 0;
-            left: 0;
-            /*z-index: 0;*/
-        }
+            .card {
+                position: absolute;
+                display: inline-block;
+                background-image: url("poker.png");
+                width: 105px;
+                height: 148px;
+                border-radius: 6px;
+                top: 0;
+                left: 0;
+            }
 
-        .anime {
-            transition: top 300ms, left 300ms;
-        }
+            .anime {
+                transition: top 300ms, left 300ms;
+            }
 
-        .hide {
-            background-position: 0px -592px;
-        }
+            .hide {
+                background-position: 0px -592px;
+            }
 
-        .area {
-            position: absolute;
-            display: inline-block;
-            width: 105px;
-            height: 148px;
-            border-radius: 6px;
-            background: #f8f2e87a;
-            /*z-index: -100;*/
-        }
+            .area {
+                position: absolute;
+                display: inline-block;
+                width: 105px;
+                height: 148px;
+                border-radius: 6px;
+                background: #f8f2e87a;
+                /*z-index: -100;*/
+            }
 
-        #id-random {
-            top: 20px;
-            left: 10px;
-        }
+            #id-random {
+                top: 20px;
+                left: 10px;
+            }
 
-        #id-show {
-            top: 20px;
-            left: 183px;
-        }
+            #id-show {
+                top: 20px;
+                left: 183px;
+            }
 
-        #id-finished1 {
-            top: 20px;
-            left: 529px;
-        }
+            #id-finished1 {
+                top: 20px;
+                left: 529px;
+            }
 
-        #id-finished2 {
-            top: 20px;
-            left: 702px;
-        }
+            #id-finished2 {
+                top: 20px;
+                left: 702px;
+            }
 
-        #id-finished3 {
-            top: 20px;
-            left: 875px;
-        }
+            #id-finished3 {
+                top: 20px;
+                left: 875px;
+            }
 
-        #id-finished4 {
-            top: 20px;
-            left: 1048px;
-        }
+            #id-finished4 {
+                top: 20px;
+                left: 1048px;
+            }
 
-        #id-empty1 {
-            top: 198px;
-            left: 10px;
-        }
+            #id-empty1 {
+                top: 198px;
+                left: 10px;
+            }
 
-        #id-empty2 {
-            top: 198px;
-            left: 183px;
-        }
+            #id-empty2 {
+                top: 198px;
+                left: 183px;
+            }
 
-        #id-empty3 {
-            top: 198px;
-            left: 356px;
-        }
+            #id-empty3 {
+                top: 198px;
+                left: 356px;
+            }
 
-        #id-empty4 {
-            top: 198px;
-            left: 529px;
-        }
+            #id-empty4 {
+                top: 198px;
+                left: 529px;
+            }
 
-        #id-empty5 {
-            top: 198px;
-            left: 702px;
-        }
+            #id-empty5 {
+                top: 198px;
+                left: 702px;
+            }
 
-        #id-empty6 {
-            top: 198px;
-            left: 875px;
-        }
+            #id-empty6 {
+                top: 198px;
+                left: 875px;
+            }
 
-        #id-empty7 {
-            top: 198px;
-            left: 1048px;
-        }
-    </style>
-</head>
-<body>
-<div id="id-message"></div>
-<div id="id-main">
-    <!--        <div class="card rh-3 hide"></div>-->
-    <div class="area" id="id-random"></div>
-    <div class="area" id="id-show"></div>
-    <div class="area" id="id-finished1"></div>
-    <div class="area" id="id-finished2"></div>
-    <div class="area" id="id-finished3"></div>
-    <div class="area" id="id-finished4"></div>
-    <div class="area" id="id-empty1"></div>
-    <div class="area" id="id-empty2"></div>
-    <div class="area" id="id-empty3"></div>
-    <div class="area" id="id-empty4"></div>
-    <div class="area" id="id-empty5"></div>
-    <div class="area" id="id-empty6"></div>
-    <div class="area" id="id-empty7"></div>
-</div>
-<script>
-    const __main = function() {
-        let game = Game.instance()
-    }
+            #id-empty7 {
+                top: 198px;
+                left: 1048px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="id-message"></div>
+        <div id="id-main">
+            <div class="area" id="id-random"></div>
+            <div class="area" id="id-show"></div>
+            <div class="area" id="id-finished1"></div>
+            <div class="area" id="id-finished2"></div>
+            <div class="area" id="id-finished3"></div>
+            <div class="area" id="id-finished4"></div>
+            <div class="area" id="id-empty1"></div>
+            <div class="area" id="id-empty2"></div>
+            <div class="area" id="id-empty3"></div>
+            <div class="area" id="id-empty4"></div>
+            <div class="area" id="id-empty5"></div>
+            <div class="area" id="id-empty6"></div>
+            <div class="area" id="id-empty7"></div>
+        </div>
+        <script>
+            const __main = function() {
+                let game = Game.instance()
+            }
 
-    __main()
-</script>
-</body>
+            __main()
+        </script>
+    </body>
 </html>

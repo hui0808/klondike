@@ -191,7 +191,7 @@ class Area extends GameObject {
         return this.stack[this.stack.length - 1]
     }
 
-    pop(card=null) {
+    pop(card = null) {
         if (card === null) {
             card = this.stack.pop()
         } else {
@@ -208,7 +208,7 @@ class Area extends GameObject {
         return card
     }
 
-    move(card, top=null, left=null) {
+    move(card, top = null, left = null) {
         top = top || this.element.offsetTop + this.stack.length * this.topInterval
         left = left || this.element.offsetLeft + this.stack.length * this.leftInterval
         card.anime(ce => {
@@ -218,7 +218,7 @@ class Area extends GameObject {
         })
     }
 
-    push(card, top=null, left=null) {
+    push(card, top = null, left = null) {
         let len = this.stack.length
         top = top || len * this.topInterval
         left = left || len * this.leftInterval
@@ -238,10 +238,10 @@ class Area extends GameObject {
         return this.id === '#' + id
     }
 
-    recover(card, top=null, left=null) {
+    recover(card, top = null, left = null) {
         let index = this.stack.indexOf(card)
-        top = top === null? index * this.topInterval: top
-        left = left === null? index * this.leftInterval: left
+        top = top === null ? index * this.topInterval : top
+        left = left === null ? index * this.leftInterval : left
         // let ce = Card.element(card)
         // ce.classList.add('anime')
         card.anime(ce => {
@@ -252,8 +252,8 @@ class Area extends GameObject {
     }
 
     checkCrash(ce) {
-        let {x: aX, y:aY} = getElementXY(this.element)
-        let {x: bX, y:bY} = getElementXY(ce)
+        let {x: aX, y: aY} = getElementXY(this.element)
+        let {x: bX, y: bY} = getElementXY(ce)
         let {offsetHeight: aHeight, offsetWidth: aWidth} = this.element
         let {offsetHeight: bHeight, offsetWidth: bWidth} = ce
         if (this.stack.length > 1) {
@@ -439,8 +439,8 @@ class StackArea extends Area {
             3: [0, 2],
         }
         let lastCard = this.last()
-        let nextNum = lastCard === undefined? 13: lastCard.num - 1
-        let type = lastCard === undefined? [0, 1, 2, 3]: o[lastCard.type]
+        let nextNum = lastCard === undefined ? 13 : lastCard.num - 1
+        let type = lastCard === undefined ? [0, 1, 2, 3] : o[lastCard.type]
         return card.num === nextNum && type.includes(card.type)
     }
 
