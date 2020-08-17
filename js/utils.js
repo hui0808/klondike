@@ -66,30 +66,6 @@ const arrayEquals = function(a, b) {
     return true
 }
 
-const clonedArray = function(array) {
-    return array.slice(0)
-}
-
-const clonedSquare = function(array) {
-    let clone = []
-    for (let i = 0; i < array.length; i++) {
-        clone.push(clonedArray(array[i]))
-    }
-    return clone
-}
-
-const getElementXY = function(element) {
-    let e = element
-    let x = e.offsetLeft
-    let y = e.offsetTop
-    while (e.parentElement !== null) {
-        x += e.parentElement.offsetLeft
-        y += e.parentElement.offsetTop
-        e = e.parentElement
-    }
-    return {x, y}
-}
-
 const checkCrash = function(aX, aY, aWidth, aHeight, bX, bY, bWidth, bHeight) {
     if ((aX + aWidth) < bX || (bX + bWidth) < aX || (aY + aHeight) < bY || (bY + bHeight) < aY) {
         return false
@@ -97,16 +73,12 @@ const checkCrash = function(aX, aY, aWidth, aHeight, bX, bY, bWidth, bHeight) {
     return true
 }
 
-const timeOut = function(callback) {
-    setTimeout(callback, 300)
-}
-
-function ranint(n, m) {
+const ranint = function(n, m) {
     let r = Math.floor(Math.random() * (m - n) + n);
     return r;
 }
 
-function range(start, end, step = 1) {
+const range = function(start, end, step = 1) {
     let r = []
     for (let i = start; i < end; i += step) {
         r.push(i)
@@ -124,33 +96,6 @@ const zeros = function(x, y) {
         r.push(tmp)
     }
     return r
-}
-
-const rotate90 = function(array) {
-    // 将array顺时针旋转90度
-    let n = array.length // 行高
-    let m = array[0].length // 列宽
-    let r = zeros(m, n)
-    for (let i = n - 1; i >= 0; i--) {
-        for (let j = 0; j < m; j++) {
-            let num = array[i][j]
-            r[j][n - i - 1] = num
-        }
-    }
-    return r
-}
-
-const aroundCoordinate = function(x, y, h, w) {
-    // 返回 (x, y) 周围的合法坐标
-    let array = [
-        [x - 1, y],
-        [x, y + 1],
-        [x + 1, y],
-        [x, y - 1],
-    ].filter(([x, y]) =>
-        x >= 0 && x < h && y >= 0 && y < w
-    )
-    return array
 }
 
 const shuffle = function(array) {

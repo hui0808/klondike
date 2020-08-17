@@ -1,59 +1,8 @@
-let tmp = [
-    {num: 12, type: 1,},
-    {num: 13, type: 2,},
-    {num: 12, type: 2,},
-    {num: 10, type: 2,},
-    {num: 1, type: 3,},
-    {num: 7, type: 1,},
-    {num: 10, type: 0,},
-    {num: 4, type: 1,},
-    {num: 3, type: 3,},
-    {num: 6, type: 0,},
-    {num: 3, type: 1,},
-    {num: 6, type: 3,},
-    {num: 8, type: 2,},
-    {num: 3, type: 0,},
-    {num: 5, type: 0,},
-    {num: 5, type: 1,},
-    {num: 11, type: 3,},
-    {num: 4, type: 2,},
-    {num: 10, type: 1,},
-    {num: 2, type: 0,},
-    {num: 11, type: 2,},
-    {num: 11, type: 1,},
-    {num: 8, type: 0,},
-    {num: 13, type: 1,},
-    {num: 1, type: 1,},
-    {num: 1, type: 2,},
-    {num: 7, type: 2,},
-    {num: 13, type: 0,},
-    {num: 3, type: 2,},
-    {num: 2, type: 1,},
-    {num: 1, type: 0,},
-    {num: 6, type: 1,},
-    {num: 6, type: 2,},
-    {num: 9, type: 2,},
-    {num: 4, type: 0,},
-    {num: 10, type: 3,},
-    {num: 5, type: 3,},
-    {num: 8, type: 3,},
-    {num: 7, type: 0,},
-    {num: 2, type: 2,},
-    {num: 12, type: 3,},
-    {num: 5, type: 2,},
-    {num: 2, type: 3,},
-    {num: 11, type: 0,},
-    {num: 7, type: 3,},
-    {num: 12, type: 0,},
-    {num: 9, type: 3,},
-    {num: 13, type: 3,},
-    {num: 8, type: 1,},
-    {num: 4, type: 3,},
-    {num: 9, type: 1,},
-    {num: 9, type: 0,},
-]
-
 class GameObject {
+    constructor() {
+        this.events = []
+    }
+
     static new(...args) {
         let i = new this(...args)
         // i.main = this.main
@@ -69,8 +18,15 @@ class GameObject {
     debug() {
     }
 
-    destory() {
+    listener(element, type, callback) {
+        this.events.push([element, type, callback])
+        element.addEventListener(type, callback)
+    }
 
+    destory() {
+        for (let [element, type, callback] of this.events) {
+            element.removeEventListener(type, callback)
+        }
     }
 }
 
@@ -99,7 +55,6 @@ class Game extends GameObject {
 
     runWithScene(scene, callback) {
         this.scene = scene.new(this, callback)
-        // 开始运行程序
         setTimeout(() => {
             this.runloop()
         }, 1000 / this.fps)
@@ -108,8 +63,7 @@ class Game extends GameObject {
     replaceScene(scene, callback) {
         this.pause = true
         this.scene.destory()
-        let s = scene.new(this, callback)
-        this.scene = s
+        this.scene = scene.new(this, callback)
         this.pause = false
     }
 
@@ -178,7 +132,6 @@ class Area extends GameObject {
         ce.parentElement.removeChild(ce)
         ce.style.top = parent.offsetTop + top + 'px'
         ce.style.left = parent.offsetLeft + left + 'px'
-        // ce.classList.add('anime')
         m.appendChild(ce)
         return card
     }
@@ -223,14 +176,14 @@ class Area extends GameObject {
         top = top || len * this.topInterval
         left = left || len * this.leftInterval
         this.stack.push(card)
-        timeOut(() => {
+        setTimeout(() => {
             let ce = Card.element(card)
             ce.remove()
             ce.style.top = top + 'px'
             ce.style.left = left + 'px'
             ce.style.zIndex = String(len)
             this.element.appendChild(ce)
-        })
+        }, 300)
     }
 
     checkMove(ce) {
@@ -242,18 +195,16 @@ class Area extends GameObject {
         let index = this.stack.indexOf(card)
         top = top === null ? index * this.topInterval : top
         left = left === null ? index * this.leftInterval : left
-        // let ce = Card.element(card)
-        // ce.classList.add('anime')
         card.anime(ce => {
             ce.style.top = top + 'px'
             ce.style.left = left + 'px'
-            timeOut(() => ce.style.zIndex = String(this.stack.length))
+            setTimeout(() => ce.style.zIndex = String(this.stack.length), 300)
         })
     }
 
     checkCrash(ce) {
-        let {x: aX, y: aY} = getElementXY(this.element)
-        let {x: bX, y: bY} = getElementXY(ce)
+        let {x: aX, y: aY} = this.element.getBoundingClientRect()
+        let {x: bX, y: bY} = ce.getBoundingClientRect()
         let {offsetHeight: aHeight, offsetWidth: aWidth} = this.element
         let {offsetHeight: bHeight, offsetWidth: bWidth} = ce
         if (this.stack.length > 1) {
@@ -364,15 +315,14 @@ class RandomArea extends Area {
     }
 
     register() {
-        this.ClickCallBack = event => {
+        this.listener(this.element, 'click', event => {
             let l = this.game.showArea.stack.length
             if (this.stack.length !== 0) {
                 this.show()
             } else if (l !== 0) {
                 this.back()
             }
-        }
-        this.element.addEventListener('click', this.ClickCallBack)
+        })
     }
 
     update() {
@@ -461,15 +411,12 @@ class StackArea extends Area {
     }
 }
 
-class Scene
-    extends GameObject {
+class Scene extends GameObject {
     constructor(game, callback = null) {
         super()
         this.game = game
-        this.score = 0
         this.cards = null
         this.animationNum = 0
-        this.task = []
         this.randomArea = RandomArea.new(this)
         this.showArea = ShowArea.new(this)
         this.stackArea = range(0, 7).map(i => StackArea.new(this, i))
@@ -490,10 +437,6 @@ class Scene
             }
         }
         this.cards = shuffle(this.cards)
-        // for (let t of tmp) {
-        //     let {num, type} = t
-        //     this.cards.push(Card.new(this, num, type))
-        // }
         this.randomArea.copy(this.cards)
         log('initCard', this.cards)
         let randomArea = e('#id-random')
@@ -554,7 +497,8 @@ class Scene
         let [top, left] = [[], []]
         let moving = false
         let match = false
-        e('#id-main').addEventListener('mousedown', event => {
+        let element = e('#id-main')
+        this.listener(element, 'mousedown', event => {
             if (event.target.classList.contains('card')) {
                 area = this.getArea(event.target)
                 if (this.stackArea.includes(area)) {
@@ -576,21 +520,23 @@ class Scene
                 }
             }
         })
-        e('#id-main').addEventListener('mousemove', event => {
+        this.listener(element, 'mousemove', event => {
             if (moving) {
                 ce.forEach((e, index) => {
                     e.style.top = top[index] + (event.clientY - y) + 'px'
                     e.style.left = left[index] + (event.clientX - x) + 'px'
                 })
-                this.stackArea.forEach(a => {
+                for (let a of this.stackArea) {
                     if (a.checkCrash(ce[0]) && a.checkMatch(card[0])) {
                         matchArea = a
                         match = true
+                        return
                     }
-                })
+                }
+                match = false
             }
         })
-        e('#id-main').addEventListener('mouseup', event => {
+        this.listener(element, 'mouseup', event => {
             if (match) {
                 card.forEach(c => {
                     area.pop(c)
@@ -631,97 +577,5 @@ class Scene
         if (this.animationNum === 0) {
             this.showArea.update()
         }
-    }
-
-    destory() {
-        super.destory();
-        // let element = e('#id-grid')
-        // element.removeEventListener('click', this.clickCallBack)
-        // element.removeEventListener('dblclick', this.dClickCallBack)
-        // element.removeEventListener('transitionend', this.deleteCallBack)
-    }
-}
-
-class GameOver extends GameObject {
-    constructor(game) {
-        super();
-        this.game = game
-        this.element = e('#id-message')
-        this.register()
-    }
-
-    register() {
-        let html = `
-            <p>Game Over!</p>
-            <div id="id-restart">Try again!</div>
-        `
-        this.element.classList.add('message-show')
-        this.element.innerHTML = html
-        this.bindEvent = event => {
-            let target = event.target
-            if (target.id === 'id-restart') {
-                this.game.replaceScene(NextStage)
-            }
-        }
-        this.element.addEventListener('click', this.bindEvent)
-
-    }
-
-    destory() {
-        super.destory();
-        log('game over')
-        e('#id-info-stage').innerHTML = "0"
-        e('#id-info-score').innerHTML = "0"
-        e('#id-info-target').innerHTML = "500"
-        this.element.innerHTML = ''
-        this.element.classList.remove('message-show')
-        this.element.removeEventListener('click', this.bindEvent)
-    }
-}
-
-class NextStage extends GameObject {
-    constructor(game) {
-        super();
-        this.game = game
-        this.stageElement = e('#id-info-stage')
-        this.scoreElement = e('#id-info-score')
-        this.targetElement = e('#id-info-target')
-        this.element = e('#id-message')
-        this.init()
-        this.register()
-    }
-
-    init() {
-        super.init()
-        this.stage = parseInt(this.stageElement.innerText) + 1
-        this.stageElement.innerText = String(this.stage)
-        this.scoreElement.innerText = '0'
-        this.target = parseInt(this.targetElement.innerText) + 500
-        this.targetElement.innerText = String(this.target)
-    }
-
-    register() {
-        let html = `
-            <p>Stage ${this.stage}</p>
-            <p>Target ${this.target}</p>
-        `
-        this.element.classList.add('message-show')
-        this.element.innerHTML = html
-        this.bindEvent = event => {
-            let target = event.target
-            if (target.classList.contains('message-show')) {
-                this.game.replaceScene(Scene, scene => {
-                    scene.target = this.target
-                })
-            }
-        }
-        this.element.addEventListener('animationend', this.bindEvent)
-    }
-
-    destory() {
-        super.destory()
-        this.element.innerHTML = ''
-        this.element.classList.remove('message-show')
-        this.element.removeEventListener('animationend', this.bindEvent)
     }
 }
