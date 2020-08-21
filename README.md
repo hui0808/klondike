@@ -1,5 +1,8 @@
 # klondike（纸牌接龙）
 该游戏使用了一个由纯ES6自建的游戏框架完成
+
+> [在线地址](http://106.53.84.52/game/klondike/)
+
 # 游戏预览
 ![](klondike.gif)
 # 游戏规则
