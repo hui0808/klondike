@@ -36,12 +36,24 @@ class Game extends GameObject {
         this.fps = 30
         this.scene = null
         this.pause = false
-        this.runWithScene(Scene)
+        this.start()
     }
 
     static instance(...args) {
         this.i = this.i || new this(...args)
         return this.i
+    }
+
+    start() {
+        let loads = 0
+        for (let img of es('.no-show')) {
+            img.addEventListener('load', event => {
+                loads++
+                if (loads === 2) {
+                    this.runWithScene(Scene)
+                }
+            })
+        }
     }
 
     runloop() {
