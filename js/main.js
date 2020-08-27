@@ -4,9 +4,7 @@ class GameObject {
     }
 
     static new(...args) {
-        let i = new this(...args)
-        // i.main = this.main
-        return i
+        return new this(...args)
     }
 
     init() {
@@ -36,24 +34,13 @@ class Game extends GameObject {
         this.fps = 30
         this.scene = null
         this.pause = false
-        this.start()
+        this.images = images
+        this.preload(() => this.runWithScene(Scene))
     }
 
     static instance(...args) {
         this.i = this.i || new this(...args)
         return this.i
-    }
-
-    start() {
-        let loads = 0
-        for (let img of es('.no-show')) {
-            img.addEventListener('load', event => {
-                loads++
-                if (loads === 2) {
-                    this.runWithScene(Scene)
-                }
-            })
-        }
     }
 
     runloop() {
@@ -81,6 +68,26 @@ class Game extends GameObject {
 
     update() {
         this.scene.update()
+    }
+
+    preload(callback) {
+        let loads = 0
+        let names = Object.keys(this.images)
+        log('images', this.images)
+        if (names.length === 0) callback && callback()
+        for (let key of names) {
+            let path = this.images[key]
+            let img = imageFromPath(path)
+            img.onload = () => {
+                log(img)
+                this.images[key] = img
+                loads++
+                if (loads === names.length) {
+                    log('load images', this.images)
+                    callback && callback()
+                }
+            }
+        }
     }
 }
 

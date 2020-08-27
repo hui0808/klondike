@@ -74,8 +74,14 @@ const checkCrash = function(aX, aY, aWidth, aHeight, bX, bY, bWidth, bHeight) {
 }
 
 const ranint = function(n, m) {
-    let r = Math.floor(Math.random() * (m - n) + n);
-    return r;
+    let r = Math.floor(Math.random() * (m - n) + n)
+    return r
+}
+
+const imageFromPath = function(path) {
+    let img = new Image()
+    img.src = path
+    return img
 }
 
 const range = function(start, end, step = 1) {
