@@ -116,10 +116,13 @@ class Card extends GameObject {
         this.game.animationNum++
         ce.classList.add('anime')
         callback(ce)
-        setTimeout(() => {
-            ce.classList.remove('anime')
-            this.game.animationNum--
-        }, 300)
+        return new Promise((resole, reject) => {
+            setTimeout(() => {
+                ce.classList.remove('anime')
+                this.game.animationNum--
+                resole(ce)
+            }, 300)
+        })
     }
 
     static element(card) {
@@ -180,10 +183,11 @@ class Area extends GameObject {
         return card
     }
 
-    move(card, top = null, left = null) {
-        top = top || this.element.offsetTop + this.stack.length * this.topInterval
-        left = left || this.element.offsetLeft + this.stack.length * this.leftInterval
-        card.anime(ce => {
+    move(card, top = null, left = null, index = 0) {
+        let n = this.stack.length + index
+        top = top || this.element.offsetTop + n * this.topInterval
+        left = left || this.element.offsetLeft + n * this.leftInterval
+        return card.anime(ce => {
             ce.style.zIndex = '100'
             ce.style.top = top + 'px'
             ce.style.left = left + 'px'
@@ -195,14 +199,12 @@ class Area extends GameObject {
         top = top || len * this.topInterval
         left = left || len * this.leftInterval
         this.stack.push(card)
-        setTimeout(() => {
-            let ce = Card.element(card)
-            ce.remove()
-            ce.style.top = top + 'px'
-            ce.style.left = left + 'px'
-            ce.style.zIndex = String(len)
-            this.element.appendChild(ce)
-        }, 300)
+        let ce = Card.element(card)
+        ce.remove()
+        ce.style.top = top + 'px'
+        ce.style.left = left + 'px'
+        ce.style.zIndex = String(len)
+        this.element.appendChild(ce)
     }
 
     checkMove(ce) {
@@ -214,10 +216,11 @@ class Area extends GameObject {
         let index = this.stack.indexOf(card)
         top = top === null ? index * this.topInterval : top
         left = left === null ? index * this.leftInterval : left
-        card.anime(ce => {
+        return card.anime(ce => {
             ce.style.top = top + 'px'
             ce.style.left = left + 'px'
-            setTimeout(() => ce.style.zIndex = String(this.stack.length), 300)
+        }).then(ce => {
+            ce.style.zIndex = String(this.stack.length)
         })
     }
 
@@ -251,7 +254,7 @@ class ShowArea extends Area {
         } else {
             left += this.stack.length * 20
         }
-        super.move(card, top, left)
+        return super.move(card, top, left)
     }
 
     push(card) {
@@ -263,21 +266,21 @@ class ShowArea extends Area {
             left += this.stack.length * 20
         }
         super.push(card, top, left)
+    }
 
-        setTimeout(() => {
-            if (this.stack.length > this.showNum) {
-                let i = this.stack.length - this.showNum
-                this.stack.forEach((card, index) => {
-                    card.anime(ce => {
-                        if (index >= i) {
-                            ce.style.left = (index - i) * 20 + 'px'
-                        } else {
-                            ce.style.left = ''
-                        }
-                    })
+    format() {
+        if (this.stack.length > this.showNum) {
+            let i = this.stack.length - this.showNum
+            this.stack.forEach((card, index) => {
+                card.anime(ce => {
+                    if (index >= i) {
+                        ce.style.left = (index - i) * 20 + 'px'
+                    } else {
+                        ce.style.left = ''
+                    }
                 })
-            }
-        }, 400)
+            })
+        }
     }
 
     checkMove(ce) {
@@ -300,7 +303,7 @@ class ShowArea extends Area {
         } else {
             left += (this.stack.length - 1) * 20
         }
-        super.recover(card, top, left);
+        return super.recover(card, top, left)
     }
 
     update() {
@@ -319,8 +322,13 @@ class RandomArea extends Area {
     show() {
         let card = this.pop()
         card.hide = false
-        this.game.showArea.move(card)
-        this.game.showArea.push(card)
+        this.game.showArea.move(card).then(() => {
+            this.game.showArea.push(card)
+        }).then(() => {
+            setTimeout(() => {
+                this.game.showArea.format()
+            }, 100)
+        })
     }
 
     back() {
@@ -328,8 +336,9 @@ class RandomArea extends Area {
         for (let i = 0; i < l; i++) {
             let card = this.game.showArea.pop()
             card.hide = true
-            this.move(card)
-            this.push(card)
+            this.move(card).then(() => {
+                this.push(card)
+            })
         }
     }
 
@@ -379,8 +388,9 @@ class FinishedArea extends Area {
             let card = area.last()
             if (card && card.hide === false && this.checkMatch(card)) {
                 area.pop()
-                this.move(card)
-                this.push(card)
+                this.move(card).then(() => {
+                    this.push(card)
+                })
             }
         }
     }
@@ -396,7 +406,6 @@ class StackArea extends Area {
 
     checkMove(ce) {
         let card = this.game.getCardFromElement(ce)
-        // return super.checkMove(ce) && Object.is(this.last(), card) && !card.hide
         return super.checkMove(ce) && !card.hide
     }
 
@@ -472,8 +481,9 @@ class Scene extends GameObject {
             for (let j = 0; j <= i; j++) {
                 let card = this.randomArea.pop()
                 card.hide = j !== i
-                stack.move(card)
-                stack.push(card)
+                stack.move(card).then(() => {
+                    stack.push(card)
+                })
             }
         }
         log('initstackCard', this.stackArea)
@@ -557,10 +567,11 @@ class Scene extends GameObject {
         })
         this.listener(element, 'mouseup', event => {
             if (match) {
-                card.forEach(c => {
+                card.forEach((c, i) => {
                     area.pop(c)
-                    matchArea.move(c)
-                    matchArea.push(c)
+                    matchArea.move(c, null, null, i).then(() => {
+                        matchArea.push(c)
+                    })
                 })
             } else if (moving) {
                 card.forEach(c => area.recover(c))
